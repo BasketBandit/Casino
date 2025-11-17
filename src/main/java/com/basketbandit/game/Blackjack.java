@@ -29,8 +29,12 @@ public class Blackjack extends Banking implements Game {
 
     @Override
     public void simulateHand() {
-        while(players.stream().anyMatch(player -> player.calculateHandValue() < 16)) {
+        boolean dealerBust = false;
+        while(players.stream().anyMatch(player -> player.handValue() < 16)) {
             for(Player player : players) {
+                if(dealerBust) {
+                    break;
+                }
                 // dealer specific rules (fairly simple)
                 if(player instanceof Dealer dealer) {
                     if(dealer.hand().isEmpty()) {
@@ -39,6 +43,9 @@ public class Blackjack extends Banking implements Game {
                     }
                     if(dealer.willDraw()) {
                         dealer.addToHand(deck.draw(1));
+                        if(dealer.handValue() > 21) {
+                            dealerBust = true;
+                        }
                     }
                     continue;
                 }
@@ -48,7 +55,7 @@ public class Blackjack extends Banking implements Game {
                     player.addToHand(deck.draw(2));
                     continue;
                 }
-                if(player.calculateHandValue() < 17) {
+                if(player.handValue() < 17) {
                     player.addToHand(deck.draw(1));
                 }
             }
@@ -58,7 +65,7 @@ public class Blackjack extends Banking implements Game {
             log.info("");
             log.info(player.name());
             player.hand().forEach(card -> log.info(card.toString()));
-            int total = player.calculateHandValue();
+            int total = player.handValue();
             log.info("Total card value: {}... {}", total, total == 21 ? "BLACKJACK" : total > 21 ? "BUST" : "");
             log.info("");
         }

@@ -37,10 +37,11 @@ public class Player {
         hand = new ArrayList<>();
     }
 
-    public int calculateHandValue() {
+    public int handValue() {
         int total = 0;
-        for(Card card: this.hand()) {
-            if(total < 11 && card.value() == 1) {
+        for(Card card: hand) {
+            // special case for aces
+            if(total < 11 && card.id() == 1) {
                 total += 11;
                 continue;
             }
