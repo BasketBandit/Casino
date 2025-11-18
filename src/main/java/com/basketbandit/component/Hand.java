@@ -25,6 +25,10 @@ public class Hand {
         return value() > 21;
     }
 
+    public boolean isBlackjack() {
+        return value() == 21;
+    }
+
     public void reset() {
         this.cards = new ArrayList<>();
     }

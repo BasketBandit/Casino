@@ -32,20 +32,18 @@ public class Blackjack extends Banking implements Game {
         boolean dealerBust = false;
         while(players.stream().anyMatch(player -> player.hand().value() < 16)) {
             for(Player player : players) {
-                if(dealerBust) {
-                    break;
-                }
                 // dealer specific rules (fairly simple)
                 if(player instanceof Dealer dealer) {
+                    if(dealer.hand().isBust()) {
+                        break;
+                    }
+
                     if(dealer.hand().isEmpty()) {
                         dealer.hand().addCard(deck.draw(2));
                         continue;
                     }
                     if(dealer.willDraw()) {
                         dealer.hand().addCard(deck.draw(1));
-                        if(dealer.hand().value() > 21) {
-                            dealerBust = true;
-                        }
                     }
                     continue;
                 }
