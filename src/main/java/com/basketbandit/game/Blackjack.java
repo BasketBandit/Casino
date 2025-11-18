@@ -30,7 +30,7 @@ public class Blackjack extends Banking implements Game {
     @Override
     public void simulateHand() {
         boolean dealerBust = false;
-        while(players.stream().anyMatch(player -> player.handValue() < 16)) {
+        while(players.stream().anyMatch(player -> player.hand().value() < 16)) {
             for(Player player : players) {
                 if(dealerBust) {
                     break;
@@ -38,12 +38,12 @@ public class Blackjack extends Banking implements Game {
                 // dealer specific rules (fairly simple)
                 if(player instanceof Dealer dealer) {
                     if(dealer.hand().isEmpty()) {
-                        dealer.addToHand(deck.draw(2));
+                        dealer.hand().addCard(deck.draw(2));
                         continue;
                     }
                     if(dealer.willDraw()) {
-                        dealer.addToHand(deck.draw(1));
-                        if(dealer.handValue() > 21) {
+                        dealer.hand().addCard(deck.draw(1));
+                        if(dealer.hand().value() > 21) {
                             dealerBust = true;
                         }
                     }
@@ -52,11 +52,11 @@ public class Blackjack extends Banking implements Game {
 
                 // player specific rules
                 if(player.hand().isEmpty()) {
-                    player.addToHand(deck.draw(2));
+                    player.hand().addCard(deck.draw(2));
                     continue;
                 }
-                if(player.handValue() < 17) {
-                    player.addToHand(deck.draw(1));
+                if(player.hand().value() < 17) {
+                    player.hand().addCard(deck.draw(1));
                 }
             }
         }
@@ -64,8 +64,8 @@ public class Blackjack extends Banking implements Game {
         for(Player player: players) {
             log.info("");
             log.info(player.name());
-            player.hand().forEach(card -> log.info(card.toString()));
-            int total = player.handValue();
+            player.hand().cards().forEach(card -> log.info(card.toString()));
+            int total = player.hand().value();
             log.info("Total card value: {}... {}", total, total == 21 ? "BLACKJACK" : total > 21 ? "BUST" : "");
             log.info("");
         }

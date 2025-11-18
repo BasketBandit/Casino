@@ -1,14 +1,12 @@
 package com.basketbandit.player;
 
-import com.basketbandit.component.Card;
+import com.basketbandit.component.Hand;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
 
 public class Player {
     protected static final org.slf4j.Logger log = LoggerFactory.getLogger(Player.class);
     private final String name;
-    private ArrayList<Card> hand = new ArrayList<>();
+    Hand hand = new Hand();
 
     public Player(String name) {
         this.name = name;
@@ -18,35 +16,7 @@ public class Player {
         return name;
     }
 
-    public ArrayList<Card> hand() {
+    public Hand hand() {
         return hand;
-    }
-
-    public void addToHand(Card card) {
-        hand.add(card);
-    }
-
-    public void addToHand(Card[] cards) {
-        for(Card card: cards) {
-            addToHand(card);
-            log.info("{} added {} to their hand.", name(), card.toString());
-        }
-    }
-
-    public void clearHand() {
-        hand = new ArrayList<>();
-    }
-
-    public int handValue() {
-        int total = 0;
-        for(Card card: hand) {
-            // special case for aces
-            if(total < 11 && card.id() == 1) {
-                total += 11;
-                continue;
-            }
-            total += card.value();
-        }
-        return total;
     }
 }
