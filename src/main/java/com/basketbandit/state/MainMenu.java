@@ -38,7 +38,7 @@ public class MainMenu extends State {
             }
         }
         if(key == Keyboard.ENTER) {
-            if(optionSelected == 0) {
+            if(options[optionSelected].equals("BLACKJACK")) {
                 if(!StateManager.hasState("blackJack")) {
                     StateManager.addAndChangeState("blackjack", new Blackjack());
                     return;
@@ -46,7 +46,7 @@ public class MainMenu extends State {
                 StateManager.changeState("blackjack");
                 return;
             }
-            if(optionSelected == 2) {
+            if(options[optionSelected].equals("QUIT")) {
                 System.exit(0);
             }
         }
