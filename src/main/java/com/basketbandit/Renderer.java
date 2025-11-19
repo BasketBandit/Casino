@@ -38,8 +38,8 @@ public class Renderer {
     private static BufferStrategy bufferStrategy;
     private static final Canvas canvas = new Canvas(graphicsConfiguration);
     static {
-        canvas.setSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize()));
-        canvas.setBounds(0, 0,10000, 10000); // allows drawing slightly (1 tile) outside of the window
+        canvas.setSize(new Dimension(1280, 720));
+        canvas.setBounds(0, 0,1280, 720);
         canvas.setBackground(Color.BLACK);
         canvas.setIgnoreRepaint(true);
         canvas.addKeyListener(new Keyboard());
@@ -52,11 +52,11 @@ public class Renderer {
     }
 
     public static int windowWidth() {
-        return Toolkit.getDefaultToolkit().getScreenSize().width;
+        return width();
     }
 
     public static int windowHeight() {
-        return Toolkit.getDefaultToolkit().getScreenSize().height;
+        return height();
     }
 
     // width of the unscaled base game

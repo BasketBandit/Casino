@@ -73,4 +73,19 @@ public class Blackjack extends Banking implements Game {
     public void simulateTurn() {
 
     }
+
+    @Override
+    public void input(int key) {
+
+    }
+
+    @Override
+    public void update() {
+
+    }
+
+    @Override
+    public void render() {
+
+    }
 }

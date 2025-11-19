@@ -26,7 +26,7 @@ public class LavaPlayer extends AudioEventAdapter {
 
     public LavaPlayer() {
         this.player.addListener(this);
-        this.player.setVolume(50);
+        this.player.setVolume(10);
         AudioSourceManagers.registerLocalSource(this.manager);
         new AudioSendHandler(manager, player).start();
     }

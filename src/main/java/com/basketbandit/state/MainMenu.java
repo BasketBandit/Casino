@@ -1,6 +1,7 @@
 package com.basketbandit.state;
 
 import com.basketbandit.Renderer;
+import com.basketbandit.game.Blackjack;
 import com.basketbandit.io.Keyboard;
 import com.basketbandit.io.audio.AudioLibrary;
 import com.basketbandit.io.audio.AudioManager;
@@ -13,7 +14,7 @@ import java.util.HashMap;
 public class MainMenu extends State {
     private final HashMap<String, Rectangle> boundingBoxes = new HashMap<>();
     private final HashMap<String, int[]> textCoordinates = new HashMap<>();
-    private final String[] options = new String[]{"PLAY", "SETTINGS", "QUIT"};
+    private final String[] options = new String[]{"BLACKJACK", "QUIT"};
     private int optionSelected = 0;
 
     public MainMenu() {
@@ -21,7 +22,7 @@ public class MainMenu extends State {
         for(String option : options) {
             textCoordinates.put(option, Fonts.centered(Renderer.graphics(), option, boundingBoxes.get("fullscreen"), Fonts.default24));
         }
-        AudioManager.background.load(AudioLibrary.audioFile("Elevator"));
+        AudioManager.background.load(AudioLibrary.audioFile("Mistadobalina"));
     }
 
     @Override
@@ -38,11 +39,11 @@ public class MainMenu extends State {
         }
         if(key == Keyboard.ENTER) {
             if(optionSelected == 0) {
-                if(!StateManager.hasState("farm")) {
-                    StateManager.addAndChangeState("farm", new World());
+                if(!StateManager.hasState("blackJack")) {
+                    StateManager.addAndChangeState("blackjack", new Blackjack());
                     return;
                 }
-                StateManager.changeState("farm");
+                StateManager.changeState("blackjack");
                 return;
             }
             if(optionSelected == 2) {

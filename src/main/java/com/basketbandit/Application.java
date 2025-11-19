@@ -12,9 +12,9 @@ public class Application extends Frame {
 
     public Application() {
         this.setTitle("Casino");
-        this.setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize()));
-        this.setExtendedState(getExtendedState() | Frame.MAXIMIZED_BOTH);
-        this.setUndecorated(true);
+        this.setSize(new Dimension(1280, 720));
+        this.setPreferredSize(new Dimension(1280, 720));
+        this.setUndecorated(false);
         this.setIgnoreRepaint(true);
         this.setResizable(false);
         this.setLayout(null);
