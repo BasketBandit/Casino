@@ -7,13 +7,22 @@ version = '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    mavenLocal()
+    maven { url = 'https://jitpack.io' }
+}
+
+ext {
+    snakeYaml  = '2.0'          // https://mvnrepository.com/artifact/org.yaml/snakeyaml
+    slf4jApi   = '2.1.0-alpha1'  // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+    slf4j      = '2.1.0-alpha1'
+    lavaplayer = '2.2.2'
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
-    implementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.1.0-alpha1'
+    implementation group: 'org.yaml', name: 'snakeyaml', version: snakeYaml
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jApi
+    implementation group: 'org.slf4j', name: 'slf4j-simple', version: slf4j
+    implementation group: 'dev.arbjerg', name: 'lavaplayer', version: lavaplayer
 }
 
 test {
