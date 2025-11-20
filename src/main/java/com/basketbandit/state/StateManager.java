@@ -1,6 +1,7 @@
 package com.basketbandit.state;
 
 import com.basketbandit.Engine;
+import com.basketbandit.game.Blackjack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,7 +11,8 @@ import java.util.Map;
 public class StateManager {
     private static final Logger log = LoggerFactory.getLogger(StateManager.class);
     private static final Map<String, State> states = new HashMap<>(Map.ofEntries(
-        Map.entry("main_menu", new MainMenu())
+            Map.entry("main_menu", new MainMenu()),
+            Map.entry("blackjack", new Blackjack())
     ));
     private static State lastState = new MainMenu();
 

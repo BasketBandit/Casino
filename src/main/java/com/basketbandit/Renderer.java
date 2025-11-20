@@ -46,6 +46,7 @@ public class Renderer {
         canvas.setVisible(true);
     }
     private static Graphics2D graphics;
+    private static Insets insets;
 
     public static Canvas canvas() {
         return canvas;
@@ -59,14 +60,14 @@ public class Renderer {
         return height();
     }
 
-    // width of the unscaled base game
+    // width of the unscaled base game (minus insets)
     public static int width() {
-        return 1280;
+        return 1280 - insets.left - insets.right;
     }
 
-    // height of the unscaled base game
+    // height of the unscaled base game (minus insets)
     public static int height() {
-        return 720;
+        return 720 - insets.top - insets.bottom;
     }
 
     public static double widthRatio() {
@@ -79,6 +80,10 @@ public class Renderer {
 
     public static void setHints(String setting) {
         selectedQuality = renderQualities.getOrDefault(setting, speed);
+    }
+
+    public static void setInsets(Insets i) {
+        insets = i;
     }
 
     public static Graphics2D graphics() {

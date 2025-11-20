@@ -1,12 +1,19 @@
 package com.basketbandit.component;
 
-public class Card {
+import com.basketbandit.Renderable;
+import com.basketbandit.io.image.SpriteManager;
+
+import java.awt.*;
+
+public class Card extends Rectangle implements Renderable {
+    public SpriteManager<Card> spriteManager;
     private final int id;
     private final String name;
     private final int value;
     private final Suit suit;
 
     public Card(int id, int value, Suit suit) {
+        super(71, 95);
         this.id = id;
         this.value = value;
         this.suit = suit;
@@ -17,6 +24,7 @@ public class Card {
             case 13 -> name = "King";
             default -> name = id + "";
         }
+        this.spriteManager = new SpriteManager<>(this);
     }
 
     public int id() {
@@ -37,6 +45,11 @@ public class Card {
 
     @Override
     public String toString() {
-        return name() + " of " + suit.name();
+        return name() + "-" + suit.name();
+    }
+
+    public void render(int x, int y) {
+        graphics.drawImage(this.spriteManager.override("missing"), x, y, null);
+        graphics.drawImage(this.spriteManager.sprite(), x, y, null);
     }
 }

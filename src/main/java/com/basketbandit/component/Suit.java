@@ -1,18 +1,18 @@
 package com.basketbandit.component;
 
 public enum Suit {
-    HEARTS("hearts"),
-    DIAMONDS("diamonds"),
-    SPADES("spades"),
-    CLUBS("clubs");
+    HEARTS(1),
+    DIAMONDS(2),
+    SPADES(3),
+    CLUBS(4);
 
-    private final String lowercase;
+    private final int id;
 
-    Suit(String lowercase) {
-        this.lowercase = lowercase;
+    Suit(int id) {
+        this.id = id;
     }
 
-    public String lowercase() {
-        return lowercase;
+    public int id() {
+        return id;
     }
 }
