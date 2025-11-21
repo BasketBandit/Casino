@@ -24,12 +24,14 @@ public class Blackjack extends Banking implements Game {
     private final HashMap<String, Rectangle> buttons = new HashMap<>();
     private final HashMap<String, Rectangle> pointers = new HashMap<>();
     private final LinkedList<Player> players = new LinkedList<>();
-    private boolean dealerOut = false;
+    private final Dealer dealer;
+    private boolean roundFinished;
+    private boolean turnInProgress;
 
     public Blackjack() {
         this.deck = new Deck();
 
-        addPlayer(new Dealer());
+        addPlayer(this.dealer = new Dealer());
         addPlayer(new Player("Julian"));
         addPlayer(new Player("Jacob"));
         addPlayer(new Player("Josh", true));
@@ -54,6 +56,9 @@ public class Blackjack extends Banking implements Game {
         pointers.put("pointer", new Rectangle(0, 0, 10, 10));
     }
 
+    // TODO:
+    // WIN CONDITIONS, CHECK STATE OF DEALER COMPARED TO OTHERS
+
     public void addPlayers(ArrayList<Player> players) {
         for(Player player: players) {
             addPlayer(player);
@@ -66,28 +71,40 @@ public class Blackjack extends Banking implements Game {
 
     @Override
     public void simulateTurn() {
+        turnInProgress = true;
         try {
-            for(Player player: players) {
+            for(Player player: players.reversed()) {
+                if(dealer.hand().isBust()) {
+                    break;
+                }
+                if(player instanceof Dealer && player.action() != Action.DEAL && !players.stream().filter(p -> !(p instanceof Dealer)).allMatch(Player::isOut)) {
+                    // dealer doesn't reveal card or start drawing until rest of the players have completed their hands
+                    continue;
+                }
                 if(player.isOut()) {
                     continue;
                 }
                 switch(player.action()) {
                     case Action.DEAL -> {
                         player.hand().addCard(deck.draw(1));
-                        Thread.sleep(100);
+                        Thread.sleep(250);
                         player.hand().addCard(deck.draw(1));
-                        Thread.sleep(100);
+                        Thread.sleep(250);
                     }
                     case Action.HIT -> {
                         player.hand().addCard(deck.draw(1));
-                        Thread.sleep(100);
+                        Thread.sleep(250);
                     }
                     case Action.STAND -> player.setOut(true);
                 }
             }
+            if(dealer.hand().isBlackjack()) {
+                this.roundFinished = true;
+            }
         } catch(InterruptedException e) {
             throw new RuntimeException(e);
         }
+        turnInProgress = false;
     }
 
     public void reset() {
@@ -97,14 +114,17 @@ public class Blackjack extends Banking implements Game {
             player.setAction(Action.DEAL);
             player.setOut(false);
         });
-        this.dealerOut = false;
+        roundFinished = false;
+        turnInProgress = false;
         simulateTurn();
     }
 
     @Override
     public void input(int key) {
         if(key == Keyboard.ENTER) {
-            simulateTurn();
+            if(!turnInProgress && !roundFinished && !dealer.hand().isBust() && !players.stream().allMatch(Player::isOut)) {
+                simulateTurn();
+            }
             for(Player player: players) {
                 if(player.isPlaying()) {
                     if(player.action() == Action.STAND) {
@@ -128,6 +148,12 @@ public class Blackjack extends Banking implements Game {
     @Override
     public void update() {
         Time.increment();
+
+        if(dealer.hand().isBust() || players.stream().allMatch(Player::isOut)) {
+            roundFinished = true;
+            return;
+        }
+
         for(Player player: players) {
             // set playing players actions from deal to hit
             if(player.isPlaying() && player.action() == Action.DEAL && !player.hand().isEmpty()) {
@@ -138,9 +164,6 @@ public class Blackjack extends Banking implements Game {
             // figure out if players are out
             if(!player.isOut() && (player.hand().isBlackjack() || player.hand().isBust())) {
                 player.setOut(true);
-                if(player instanceof Dealer) {
-                    this.dealerOut = true;
-                }
             }
 
             if(!player.isPlaying()) { // dealer and npcs
@@ -157,10 +180,12 @@ public class Blackjack extends Banking implements Game {
         }
 
         // simulate rest of game if player is out
-        if(Time.ticks() % 300 == 0) {
+        if(Time.ticks() % 180 == 0) {
             for(Player player: players) {
-                if(player.isPlaying() && player.isOut())
+                if(!turnInProgress && !roundFinished && player.isPlaying() && player.isOut()) {
                     simulateTurn();
+                    return;
+                }
             }
         }
     }
@@ -182,8 +207,8 @@ public class Blackjack extends Banking implements Game {
             graphics.draw(r);
             graphics.drawString(player.name(), r.x, r.y-10);
             for(int i = 0; i < player.hand().cards().size(); i++) {
-                if(player.hand().isBust()) {
-                    graphics.drawImage(SpriteLibrary.instance("reverse"), r.x + 2 + (25 * i), r.y + 2 + (int) (Math.sin(Time.slowTicks() + i) * 2), null);
+                if(player instanceof Dealer && i == 0 && player.hand().cards().size() < 3 && !player.isOut()) {
+                    graphics.drawImage(SpriteLibrary.instance("reverse"), r.x + 2, r.y + 2 + (int) (Math.sin(Time.slowTicks() + i) * 2), null);
                 } else {
                     player.hand().cards().get(i).render(r.x + 2 + (25 * i), r.y + 2 + (int) (Math.sin(Time.slowTicks() + i) * 2));
                 }
@@ -196,7 +221,7 @@ public class Blackjack extends Banking implements Game {
             }
 
             // players action buttons
-            if(player.isPlaying() && player.action() != Action.DEAL && !player.isOut()) {
+            if(!roundFinished && player.isPlaying() && player.action() != Action.DEAL && !player.isOut() && !dealer.hand().isBust()) {
                 buttons.forEach((name, button) ->  {
                     graphics.setColor(name.equals("hit") ? Colours.BLUE : Colours.CRIMSON_75);
                     graphics.fill(button);

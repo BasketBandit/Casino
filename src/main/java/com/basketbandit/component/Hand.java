@@ -1,6 +1,5 @@
 package com.basketbandit.component;
 
-import com.basketbandit.player.Player;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
@@ -26,7 +25,7 @@ public class Hand {
     }
 
     public boolean isBlackjack() {
-        return value() == 21;
+        return cards().size() == 2 && value() == 21;
     }
 
     public void reset() {
