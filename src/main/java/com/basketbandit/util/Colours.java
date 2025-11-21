@@ -39,4 +39,5 @@ public class Colours {
 
     public static final Color GREEN = new Color(0, 127, 50);
     public static final Color GREEN_75 = new Color(0, 127, 50, 192);
+    public static final Color GREEN_25 = new Color(0, 127, 50, 64);
 }

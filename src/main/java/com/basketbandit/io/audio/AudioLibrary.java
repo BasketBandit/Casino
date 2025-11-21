@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public class AudioLibrary {
     private static final HashMap<String, URL> audio = new HashMap<>(Map.ofEntries(
-            Map.entry("Mistadobalina", Objects.requireNonNull(AudioLibrary.class.getClassLoader().getResource("assets/audio/Mistadobalina.mp3")))
+            Map.entry("smooth", Objects.requireNonNull(AudioLibrary.class.getClassLoader().getResource("assets/audio/smooth-jazz.mp3")))
     ));
     private static final HashMap<String, URL> effects = new HashMap<>(Map.ofEntries(
             //Map.entry("pop1", Objects.requireNonNull(AudioLibrary.class.getClassLoader().getResource("assets/audio/effects/pop1.wav"))),

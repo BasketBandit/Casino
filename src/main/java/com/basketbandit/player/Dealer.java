@@ -3,7 +3,7 @@ package com.basketbandit.player;
 public class Dealer extends Player {
 
     public Dealer() {
-        super("Dealer");
+        super("Dealer", false);
     }
 
     /* Dealer will always hit if below 17 */

@@ -22,7 +22,7 @@ public class MainMenu extends State {
         for(String option : options) {
             textCoordinates.put(option, Fonts.centered(Renderer.graphics(), option, boundingBoxes.get("fullscreen"), Fonts.default24));
         }
-        AudioManager.background.load(AudioLibrary.audioFile("Mistadobalina"));
+        AudioManager.background.load(AudioLibrary.audioFile("smooth"));
     }
 
     @Override

@@ -30,6 +30,8 @@ public class SpriteLibrary {
     static {
         sprites = new HashMap<>(Map.ofEntries(
                 Map.entry("missing", spriteSheets.get("deck-background").getSubimage(71, 0, 71, 95)),
+                Map.entry("background", spriteSheets.get("deck-background").getSubimage(71, 0, 71, 95)),
+                Map.entry("reverse", spriteSheets.get("deck-background").getSubimage(0, 0, 71, 95)),
                 Map.entry("2-HEARTS", spriteSheets.get("deck-number").getSubimage(0, 0, 71, 95)),
                 Map.entry("3-HEARTS", spriteSheets.get("deck-number").getSubimage(71, 0, 71, 95)),
                 Map.entry("4-HEARTS", spriteSheets.get("deck-number").getSubimage(71*2, 0, 71, 95)),
