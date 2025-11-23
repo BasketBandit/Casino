@@ -5,5 +5,4 @@ public class AudioManager {
     static {
         background.setLoop(true);
     }
-    //public static final LavaPlayer effects = new LavaPlayer();
 }

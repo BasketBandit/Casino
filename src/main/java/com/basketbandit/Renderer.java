@@ -1,6 +1,7 @@
 package com.basketbandit;
 
 import com.basketbandit.io.Keyboard;
+import com.basketbandit.io.Mouse;
 
 import java.awt.*;
 import java.awt.image.BufferStrategy;
@@ -43,6 +44,7 @@ public class Renderer {
         canvas.setBackground(Color.BLACK);
         canvas.setIgnoreRepaint(true);
         canvas.addKeyListener(new Keyboard());
+        canvas.addMouseListener(new Mouse());
         canvas.setVisible(true);
     }
     private static Graphics2D graphics;

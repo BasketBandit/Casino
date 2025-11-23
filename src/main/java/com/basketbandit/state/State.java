@@ -1,5 +1,6 @@
 package com.basketbandit.state;
 
+import com.basketbandit.io.Input;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,7 +10,7 @@ public abstract class State {
     public State() {
     }
 
-    public abstract void input(int key);
+    public abstract void input(Input type, int[] id);
     public abstract void update();
     public abstract void render();
 }

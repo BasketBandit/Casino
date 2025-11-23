@@ -2,6 +2,7 @@ package com.basketbandit.state;
 
 import com.basketbandit.Renderer;
 import com.basketbandit.game.Blackjack;
+import com.basketbandit.io.Input;
 import com.basketbandit.io.Keyboard;
 import com.basketbandit.io.audio.AudioLibrary;
 import com.basketbandit.io.audio.AudioManager;
@@ -26,28 +27,30 @@ public class MainMenu extends State {
     }
 
     @Override
-    public void input(int key) {
-        if(key == Keyboard.UP_ARROW) {
-            if(--optionSelected < 0) {
-                optionSelected = options.length-1;
+    public void input(Input type, int[] id) {
+        if(type == Input.KEYBOARD) {
+            if(id[0] == Keyboard.UP_ARROW) {
+                if(--optionSelected < 0) {
+                    optionSelected = options.length - 1;
+                }
             }
-        }
-        if(key == Keyboard.DOWN_ARROW) {
-            if(++optionSelected > options.length-1) {
-                optionSelected = 0;
+            if(id[0] == Keyboard.DOWN_ARROW) {
+                if(++optionSelected > options.length - 1) {
+                    optionSelected = 0;
+                }
             }
-        }
-        if(key == Keyboard.ENTER) {
-            if(options[optionSelected].equals("BLACKJACK")) {
-                if(!StateManager.hasState("blackJack")) {
-                    StateManager.addAndChangeState("blackjack", new Blackjack());
+            if(id[0] == Keyboard.ENTER) {
+                if(options[optionSelected].equals("BLACKJACK")) {
+                    if(!StateManager.hasState("blackJack")) {
+                        StateManager.addAndChangeState("blackjack", new Blackjack());
+                        return;
+                    }
+                    StateManager.changeState("blackjack");
                     return;
                 }
-                StateManager.changeState("blackjack");
-                return;
-            }
-            if(options[optionSelected].equals("QUIT")) {
-                System.exit(0);
+                if(options[optionSelected].equals("QUIT")) {
+                    System.exit(0);
+                }
             }
         }
     }

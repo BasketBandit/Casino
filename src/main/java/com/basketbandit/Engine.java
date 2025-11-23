@@ -1,5 +1,6 @@
 package com.basketbandit;
 
+import com.basketbandit.io.Input;
 import com.basketbandit.state.State;
 import com.basketbandit.state.StateManager;
 
@@ -29,8 +30,8 @@ public class Engine implements Runnable {
         executor.submit(task);
     }
 
-    public static void input(int key) {
-        state.input(key);
+    public static void input(Input type, int[] id) {
+        state.input(type, id);
     }
 
     public static State state() {

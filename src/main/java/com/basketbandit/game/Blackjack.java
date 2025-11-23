@@ -3,7 +3,9 @@ package com.basketbandit.game;
 import com.basketbandit.Renderer;
 import com.basketbandit.component.Action;
 import com.basketbandit.component.Deck;
+import com.basketbandit.io.Input;
 import com.basketbandit.io.Keyboard;
+import com.basketbandit.io.Mouse;
 import com.basketbandit.io.audio.AudioLibrary;
 import com.basketbandit.io.image.SpriteLibrary;
 import com.basketbandit.player.Dealer;
@@ -124,28 +126,48 @@ public class Blackjack extends Banking implements Game {
     }
 
     @Override
-    public void input(int key) {
-        if(key == Keyboard.ENTER) {
-            if(!turnInProgress && !roundFinished && !dealer.hand().isBust() && !players.stream().allMatch(Player::isOut)) {
-                simulateTurn();
+    public void input(Input type, int[] id) {
+        if(type == Input.MOUSE) {
+            if(id[0] == Mouse.LEFT_CLICK) {
+                Rectangle point = new Rectangle(id[1], id[2], 1, 1);
+                buttons.keySet().forEach(button -> {
+                    if(buttons.get(button).intersects(point)) {
+                        for(Player player : players) {
+                            if(player.isPlaying() && player.hand().cards().size() > 1 && !player.isOut()) {
+                                player.setAction(button.equals("stand") ? Action.STAND : Action.HIT);
+                                return;
+                            }
+                        }
+                    }
+                });
             }
-            for(Player player: players) {
-                if(player.isPlaying()) {
-                    if(player.action() == Action.STAND) {
-                        player.setOut(true);
+            return;
+        }
+
+        if(type == Input.KEYBOARD) {
+            if(id[0] == Keyboard.ENTER) {
+                if(!turnInProgress && !roundFinished && !dealer.hand().isBust() && !players.stream().allMatch(Player::isOut)) {
+                    simulateTurn();
+                }
+                for(Player player : players) {
+                    if(player.isPlaying()) {
+                        if(player.action() == Action.STAND) {
+                            player.setOut(true);
+                        }
                     }
                 }
             }
-        }
-        if(key == Keyboard.LEFT_ARROW || key == Keyboard.RIGHT_ARROW) {
-            for(Player player: players) {
-                if(player.isPlaying() && player.hand().cards().size() > 1 && !player.isOut()) {
-                    player.setAction(player.action() == Action.HIT ? Action.STAND : Action.HIT);
+            if(dealer.hand().cards().size() > 1 && (id[0] == Keyboard.LEFT_ARROW || id[0] == Keyboard.RIGHT_ARROW)) {
+                for(Player player : players) {
+                    if(player.isPlaying() && player.hand().cards().size() > 1 && !player.isOut()) {
+                        player.setAction(player.action() == Action.HIT ? Action.STAND : Action.HIT);
+                        return;
+                    }
                 }
             }
-        }
-        if(key == Keyboard.E) {
-            reset();
+            if(id[0] == Keyboard.E) {
+                reset();
+            }
         }
     }
 
@@ -199,7 +221,7 @@ public class Blackjack extends Banking implements Game {
         Graphics2D graphics = Renderer.graphics();
         graphics.setColor(Colours.GREEN_75);
         graphics.fillRect(0, 0, Renderer.width(), Renderer.height());
-        graphics.setFont(Fonts.default24);
+        graphics.setFont(Fonts.default20);
         graphics.setColor(Colours.WHITE);
         graphics.drawString("Blackjack", 50, 50);
 
@@ -220,17 +242,17 @@ public class Blackjack extends Banking implements Game {
 
             if(player.hand().isBlackjack()) {
                 graphics.setColor(Colours.WHITE);
-                int[] c = Fonts.centered(graphics, "Blackjack", r, Fonts.default24);
+                int[] c = Fonts.centered(graphics, "Blackjack", r, Fonts.default20);
                 graphics.drawString("Blackjack", c[0], r.y + 125 + (int) (Math.sin(Time.slowTicks()) * 2));
             }
 
             // players action buttons
-            if(!roundFinished && player.isPlaying() && player.action() != Action.DEAL && !player.isOut() && !dealer.hand().isBust()) {
+            if(!roundFinished && player.isPlaying() && player.action() != Action.DEAL && !player.isOut() && !dealer.hand().isBust() && dealer.hand().cards().size() > 1) {
                 buttons.forEach((name, button) ->  {
                     graphics.setColor(name.equals("hit") ? Colours.BLUE : Colours.CRIMSON_75);
                     graphics.fill(button);
 
-                    int[] c = Fonts.centered(graphics, name, button, Fonts.default24);
+                    int[] c = Fonts.centered(graphics, name, button, Fonts.default20);
                     graphics.setColor(Colours.WHITE);
                     graphics.drawString(name, c[0], c[1] + (int) (Math.sin(Time.slowTicks()) * 2));
 

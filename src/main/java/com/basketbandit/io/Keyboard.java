@@ -45,7 +45,7 @@ public class Keyboard extends KeyAdapter {
         }
 
         keys[e.getKeyCode()] = true;
-        Engine.input(e.getKeyCode());
+        Engine.input(Input.KEYBOARD, new int[]{e.getKeyCode()});
     }
 
     @Override
