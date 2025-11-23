@@ -4,6 +4,7 @@ import com.basketbandit.Renderer;
 import com.basketbandit.component.Action;
 import com.basketbandit.component.Deck;
 import com.basketbandit.io.Keyboard;
+import com.basketbandit.io.audio.AudioLibrary;
 import com.basketbandit.io.image.SpriteLibrary;
 import com.basketbandit.player.Dealer;
 import com.basketbandit.player.Player;
@@ -87,13 +88,16 @@ public class Blackjack extends Banking implements Game {
                 switch(player.action()) {
                     case Action.DEAL -> {
                         player.hand().addCard(deck.draw(1));
-                        Thread.sleep(250);
+                        AudioLibrary.effect("deal1").play(-20);
+                        Thread.sleep(750);
                         player.hand().addCard(deck.draw(1));
-                        Thread.sleep(250);
+                        AudioLibrary.effect("deal1").play(-20);
+                        Thread.sleep(750);
                     }
                     case Action.HIT -> {
                         player.hand().addCard(deck.draw(1));
-                        Thread.sleep(250);
+                        AudioLibrary.effect("deal1").play(-20);
+                        Thread.sleep(750);
                     }
                     case Action.STAND -> player.setOut(true);
                 }

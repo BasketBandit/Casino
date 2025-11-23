@@ -16,13 +16,13 @@ public class Fonts {
 
     static {
         try {
-            Font openSans = Font.createFont(Font.TRUETYPE_FONT, Fonts.class.getResourceAsStream("/assets/font/Open_Sans/OpenSans-Regular.ttf"));
-            default8 = openSans.deriveFont(8.0f);
-            default12 = openSans.deriveFont(12.0f);
-            default16 = openSans.deriveFont(16.0f);
-            default24 = openSans.deriveFont(24.0f);
-            default36 = openSans.deriveFont(36.0f);
-            default72 = openSans.deriveFont(72.0f);
+            Font font = Font.createFont(Font.TRUETYPE_FONT, Fonts.class.getResourceAsStream("/assets/font/balatro/balatro.ttf"));
+            default8 = font.deriveFont(8.0f);
+            default12 = font.deriveFont(12.0f);
+            default16 = font.deriveFont(16.0f);
+            default24 = font.deriveFont(24.0f);
+            default36 = font.deriveFont(36.0f);
+            default72 = font.deriveFont(72.0f);
         } catch(Exception ex) {
             log.error(ex.getMessage());
         }
