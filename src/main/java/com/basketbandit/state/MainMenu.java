@@ -1,7 +1,7 @@
 package com.basketbandit.state;
 
 import com.basketbandit.Renderer;
-import com.basketbandit.game.Blackjack;
+import com.basketbandit.state.game.Blackjack;
 import com.basketbandit.io.Input;
 import com.basketbandit.io.Keyboard;
 import com.basketbandit.io.audio.AudioLibrary;

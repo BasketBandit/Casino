@@ -1,7 +1,7 @@
 package com.basketbandit.state;
 
 import com.basketbandit.Engine;
-import com.basketbandit.game.Blackjack;
+import com.basketbandit.state.game.Blackjack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -45,6 +45,7 @@ public class Renderer {
         canvas.setIgnoreRepaint(true);
         canvas.addKeyListener(new Keyboard());
         canvas.addMouseListener(new Mouse());
+        canvas.addMouseMotionListener(new Mouse());
         canvas.setVisible(true);
     }
     private static Graphics2D graphics;

@@ -1,4 +1,4 @@
-package com.basketbandit.game;
+package com.basketbandit.state.game;
 
 import com.basketbandit.Renderer;
 import com.basketbandit.component.Action;
@@ -128,6 +128,22 @@ public class Blackjack extends Banking implements Game {
     @Override
     public void input(Input type, int[] id) {
         if(type == Input.MOUSE) {
+
+            if(id[0] == Mouse.MOUSE_MOVED) {
+                Rectangle point = new Rectangle(id[1], id[2], 1, 1);
+                buttons.keySet().forEach(button -> {
+                    if(buttons.get(button).intersects(point)) {
+                        for(Player player : players) {
+                            if(player.isPlaying() && player.hand().cards().size() > 1 && !player.isOut()) {
+                                player.setAction(button.equals("stand") ? Action.STAND : Action.HIT);
+                                return;
+                            }
+                        }
+                    }
+                });
+                return;
+            }
+
             if(id[0] == Mouse.LEFT_CLICK) {
                 Rectangle point = new Rectangle(id[1], id[2], 1, 1);
                 buttons.keySet().forEach(button -> {
@@ -135,6 +151,12 @@ public class Blackjack extends Banking implements Game {
                         for(Player player : players) {
                             if(player.isPlaying() && player.hand().cards().size() > 1 && !player.isOut()) {
                                 player.setAction(button.equals("stand") ? Action.STAND : Action.HIT);
+                                if(!turnInProgress && !roundFinished && !dealer.hand().isBust() && !players.stream().allMatch(Player::isOut)) {
+                                    simulateTurn();
+                                }
+                                if(player.action() == Action.STAND) {
+                                    player.setOut(true);
+                                }
                                 return;
                             }
                         }

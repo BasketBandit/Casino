@@ -1,4 +1,4 @@
-package com.basketbandit.game;
+package com.basketbandit.state.game;
 
 import com.basketbandit.component.Deck;
 import com.basketbandit.state.State;

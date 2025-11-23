@@ -1,4 +1,4 @@
-package com.basketbandit.game;
+package com.basketbandit.state.game;
 
 public interface Game {
     void simulateTurn();
