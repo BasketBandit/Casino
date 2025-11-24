@@ -1,9 +1,13 @@
 package com.basketbandit.io.audio;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.sound.sampled.*;
 import java.io.InputStream;
 
 public class SoundEffect {
+    private static final Logger log = LoggerFactory.getLogger(SoundEffect.class);
     private AudioFormat format;
     private byte[] audioData;
 
@@ -13,12 +17,12 @@ public class SoundEffect {
             format = stream.getFormat();
             audioData = stream.readAllBytes();
         } catch(Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 
     public void play() {
-        new Thread(() -> {
+        Thread.startVirtualThread(() -> {
             try {
                 SourceDataLine line = AudioSystem.getSourceDataLine(format);
                 line.open(format);
@@ -29,14 +33,14 @@ public class SoundEffect {
 
                 line.drain();
                 line.close();
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch(Exception e) {
+                log.error(e.getMessage(), e);
             }
-        }).start(); // Each play runs in its own thread
+        });
     }
 
     public void play(float volume) {
-        new Thread(() -> {
+        Thread.startVirtualThread(() -> {
             try {
                 SourceDataLine line = AudioSystem.getSourceDataLine(format);
                 line.open(format);
@@ -51,9 +55,9 @@ public class SoundEffect {
                 line.write(audioData, 0, audioData.length);
                 line.drain();
                 line.close();
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch(Exception e) {
+                log.error(e.getMessage(), e);
             }
-        }).start();
+        });
     }
 }
