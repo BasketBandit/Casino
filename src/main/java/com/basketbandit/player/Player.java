@@ -9,17 +9,17 @@ public class Player {
     private final String name;
     Hand hand = new Hand();
     private Action action = Action.DEAL;
-    private final boolean playing;
+    private final boolean human;
     private boolean out;
 
     public Player(String name) {
         this.name = name;
-        this.playing = false;
+        this.human = false;
     }
 
-    public Player(String name, boolean playing) {
+    public Player(String name, boolean human) {
         this.name = name;
-        this.playing = playing;
+        this.human = human;
     }
 
     public String name() {
@@ -34,8 +34,8 @@ public class Player {
         return action;
     }
 
-    public boolean isPlaying() {
-        return playing;
+    public boolean isHuman() {
+        return human;
     }
 
     public boolean isOut() {
