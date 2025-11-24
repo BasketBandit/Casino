@@ -26,6 +26,7 @@ public class Blackjack extends Banking implements Game {
     protected static final Logger log = LoggerFactory.getLogger(Blackjack.class);
     private final LinkedList<Rectangle> positions = new LinkedList<>();
     private final HashMap<String, Rectangle> buttons = new HashMap<>();
+    private Rectangle selectedButton;
     private final HashMap<String, Rectangle> pointers = new HashMap<>();
     private final LinkedList<Player> players = new LinkedList<>();
     private final Dealer dealer;
@@ -137,17 +138,11 @@ public class Blackjack extends Banking implements Game {
     @Override
     public void input(Input type, int[] id) {
         if(type == Input.MOUSE) {
-
             if(id[0] == Mouse.MOUSE_MOVED) {
                 Rectangle point = new Rectangle(id[1], id[2], 1, 1);
                 buttons.keySet().forEach(button -> {
                     if(buttons.get(button).intersects(point)) {
-                        for(Player player : players) {
-                            if(player.isPlaying() && player.hand().cards().size() > 1 && !player.isOut()) {
-                                player.setAction(button.equals("stand") ? Action.STAND : Action.HIT);
-                                return;
-                            }
-                        }
+                        selectedButton = buttons.get(button);
                     }
                 });
                 return;
@@ -178,12 +173,16 @@ public class Blackjack extends Banking implements Game {
 
         if(type == Input.KEYBOARD) {
             if(id[0] == Keyboard.ENTER) {
-                if(!turnInProgress && !roundFinished && !dealer.hand().isBust() && !players.stream().allMatch(Player::isOut)) {
-                    simulateTurn();
-                }
+                // if(!turnInProgress && !roundFinished && !dealer.hand().isBust() && !players.stream().allMatch(Player::isOut)) {
+                //     simulateTurn();
+                // }
                 for(Player player : players) {
                     if(player.isPlaying()) {
-                        if(player.action() == Action.STAND) {
+                        if(selectedButton.equals(buttons.get("hit"))) {
+                            player.setAction(Action.HIT);
+                        }
+                        if(selectedButton.equals(buttons.get("stand"))) {
+                            player.setAction(Action.STAND);
                             player.setOut(true);
                         }
                     }
@@ -192,7 +191,7 @@ public class Blackjack extends Banking implements Game {
             if(dealer.hand().cards().size() > 1 && (id[0] == Keyboard.LEFT_ARROW || id[0] == Keyboard.RIGHT_ARROW)) {
                 for(Player player : players) {
                     if(player.isPlaying() && player.hand().cards().size() > 1 && !player.isOut()) {
-                        player.setAction(player.action() == Action.HIT ? Action.STAND : Action.HIT);
+                        selectedButton = (selectedButton == buttons.get("hit")) ? buttons.get("stand") : buttons.get("hit");
                         return;
                     }
                 }
@@ -288,11 +287,11 @@ public class Blackjack extends Banking implements Game {
                     graphics.setColor(Colours.WHITE);
                     graphics.drawString(name, c[0], c[1] + (int) (Math.sin(Time.slowTicks()) * 2));
 
-                    if(player.action() == Action.HIT && name.equals("hit")) {
+                    if(button.equals(selectedButton) && name.equals("hit")) {
                         pointers.get("pointer").setLocation(button.x + (button.width/2) - (pointers.get("pointer").width/2), c[1] + 15);
                         graphics.fill(pointers.get("pointer"));
                     }
-                    if(player.action() == Action.STAND && name.equals("stand")) {
+                    if(button.equals(selectedButton) && name.equals("stand")) {
                         pointers.get("pointer").setLocation(button.x + (button.width/2) - (pointers.get("pointer").width/2), c[1] + 15);
                         graphics.fill(pointers.get("pointer"));
                     }
