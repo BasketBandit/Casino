@@ -12,15 +12,16 @@ import java.util.concurrent.Future;
 
 public class Engine implements Runnable {
     private static final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-    private static State state;
+    private static State state = StateManager.state("main_menu");
     private static boolean running = true;
     private static final int targetUPS = 60;
-    private static int targetFPS = 144;
+    private static int targetFPS = 144; // 144
     private static volatile int framesPerSecond = 0;
+    private static final Clock clock = new Clock();
+    private static final Update update = new Update();
+    private static final Render render = new Render();
 
-    public Engine() {
-        StateManager.changeState("main_menu");
-    }
+    public Engine() {}
 
     public static Future<?> submitTask(Callable<?> task) {
         return executor.submit(task);
@@ -54,15 +55,11 @@ public class Engine implements Runnable {
         return framesPerSecond;
     }
 
-    private static final Clock clock = new Clock();
-    private static final Update update = new Update();
-    private static final Render render = new Render();
-
     @Override
     public void run() {
-        new Thread(clock, "Clock").start();
-        new Thread(update, "Update").start();
-        new Thread(render, "Render").start();
+        Thread.startVirtualThread(clock);
+        Thread.startVirtualThread(update);
+        Thread.startVirtualThread(render);
     }
 
     private static class Clock implements Runnable {
