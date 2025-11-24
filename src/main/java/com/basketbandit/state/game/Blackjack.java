@@ -30,7 +30,6 @@ public class Blackjack extends Banking implements Game {
     private final HashMap<String, Rectangle> pointers = new HashMap<>();
     private final LinkedList<Player> players = new LinkedList<>();
     private final Dealer dealer;
-    private int rotation;
     private boolean roundFinished;
     private boolean turnInProgress;
 
