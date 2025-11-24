@@ -9,7 +9,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Engine implements Runnable {
     private static final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -17,7 +16,7 @@ public class Engine implements Runnable {
     private static boolean running = true;
     private static final int targetUPS = 60;
     private static int targetFPS = 144;
-    private static final AtomicInteger framesPerSecond = new AtomicInteger(0);
+    private static volatile int framesPerSecond = 0;
 
     public Engine() {
         StateManager.changeState("main_menu");
@@ -52,7 +51,7 @@ public class Engine implements Runnable {
     }
 
     public static int framerate() {
-        return framesPerSecond.get();
+        return framesPerSecond;
     }
 
     private static final Clock clock = new Clock();
@@ -86,7 +85,7 @@ public class Engine implements Runnable {
                 }
 
                 if(System.currentTimeMillis() - timer > 1000) {
-                    framesPerSecond.set(render.frames());
+                    framesPerSecond = render.frames();
                     render.resetFrames();
                     timer += 1000;
                 }
