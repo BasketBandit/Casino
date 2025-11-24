@@ -19,6 +19,7 @@ public class Application extends JFrame {
         this.setIgnoreRepaint(true);
         this.setResizable(false);
         this.setLayout(null);
+        this.setLocationRelativeTo(null);
         this.add(Renderer.canvas());
         this.setVisible(true);
 

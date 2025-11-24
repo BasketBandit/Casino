@@ -9,7 +9,7 @@ public class Player {
     private final String name;
     Hand hand = new Hand();
     private Action action = Action.DEAL;
-    private boolean playing;
+    private final boolean playing;
     private boolean out;
 
     public Player(String name) {

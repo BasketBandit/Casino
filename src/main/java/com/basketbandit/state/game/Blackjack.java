@@ -1,5 +1,6 @@
 package com.basketbandit.state.game;
 
+import com.basketbandit.Engine;
 import com.basketbandit.Renderer;
 import com.basketbandit.component.Action;
 import com.basketbandit.component.Deck;
@@ -28,8 +29,11 @@ public class Blackjack extends Banking implements Game {
     private final HashMap<String, Rectangle> pointers = new HashMap<>();
     private final LinkedList<Player> players = new LinkedList<>();
     private final Dealer dealer;
+    private int rotation;
     private boolean roundFinished;
     private boolean turnInProgress;
+
+    private int cardDrawDelayMs = 500;
 
     public Blackjack() {
         this.deck = new Deck();
@@ -59,9 +63,6 @@ public class Blackjack extends Banking implements Game {
         pointers.put("pointer", new Rectangle(0, 0, 10, 10));
     }
 
-    // TODO:
-    // WIN CONDITIONS, CHECK STATE OF DEALER COMPARED TO OTHERS
-
     public void addPlayers(ArrayList<Player> players) {
         for(Player player: players) {
             addPlayer(player);
@@ -77,34 +78,42 @@ public class Blackjack extends Banking implements Game {
         turnInProgress = true;
         try {
             for(Player player: players.reversed()) {
-                if(dealer.hand().isBust()) {
-                    break;
-                }
-                if(player instanceof Dealer && player.action() != Action.DEAL && !players.stream().filter(p -> !(p instanceof Dealer)).allMatch(Player::isOut)) {
-                    // dealer doesn't reveal card or start drawing until rest of the players have completed their hands
-                    continue;
-                }
+                // if player is out, fail fast
                 if(player.isOut()) {
                     continue;
                 }
+
+                // if player is dealer, their action isn't to deal (get 2 cards) and all other players aren't out --- dealer only draws after rest of players have concluded their hands
+                if(player instanceof Dealer && player.action() != Action.DEAL && !players.stream().filter(p -> !(p instanceof Dealer)).allMatch(Player::isOut)) {
+                    continue;
+                }
+
+                while(player.isPlaying() && player.action() == Action.WAITING) {
+                    Thread.onSpinWait();
+                }
+
                 switch(player.action()) {
                     case Action.DEAL -> {
                         player.hand().addCard(deck.draw(1));
-                        AudioLibrary.effect("deal1").play(-20);
-                        Thread.sleep(750);
+                        AudioLibrary.effect("deal1").play(-15);
+                        Thread.sleep(cardDrawDelayMs);
                         player.hand().addCard(deck.draw(1));
-                        AudioLibrary.effect("deal1").play(-20);
-                        Thread.sleep(750);
+                        AudioLibrary.effect("deal1").play(-15);
+                        Thread.sleep(cardDrawDelayMs);
+                        player.setAction(Action.WAITING);
                     }
                     case Action.HIT -> {
                         player.hand().addCard(deck.draw(1));
-                        AudioLibrary.effect("deal1").play(-20);
-                        Thread.sleep(750);
+                        AudioLibrary.effect("deal1").play(-15);
+                        Thread.sleep(cardDrawDelayMs);
+                        player.setAction(Action.WAITING);
                     }
                     case Action.STAND -> player.setOut(true);
                 }
             }
-            if(dealer.hand().isBlackjack()) {
+
+            if(dealer.hand().isBlackjack() || dealer.hand().isBust()) {
+                dealer.setOut(true);
                 this.roundFinished = true;
             }
         } catch(InterruptedException e) {
@@ -153,6 +162,7 @@ public class Blackjack extends Banking implements Game {
                                 player.setAction(button.equals("stand") ? Action.STAND : Action.HIT);
                                 if(!turnInProgress && !roundFinished && !dealer.hand().isBust() && !players.stream().allMatch(Player::isOut)) {
                                     simulateTurn();
+                                    player.setAction(Action.WAITING);
                                 }
                                 if(player.action() == Action.STAND) {
                                     player.setOut(true);
@@ -195,17 +205,19 @@ public class Blackjack extends Banking implements Game {
 
     @Override
     public void update() {
-        Time.increment();
-
         if(dealer.hand().isBust() || players.stream().allMatch(Player::isOut)) {
             roundFinished = true;
             return;
         }
 
         for(Player player: players) {
+            if(player.isOut()) {
+                continue;
+            }
+
             // set playing players actions from deal to hit
             if(player.isPlaying() && player.action() == Action.DEAL && !player.hand().isEmpty()) {
-                player.setAction(Action.HIT);
+                player.setAction(Action.WAITING);
                 continue;
             }
 
@@ -227,13 +239,10 @@ public class Blackjack extends Banking implements Game {
             }
         }
 
-        // simulate rest of game if player is out
-        if(Time.ticks() % 180 == 0) {
-            for(Player player: players) {
-                if(!turnInProgress && !roundFinished && player.isPlaying() && player.isOut()) {
-                    simulateTurn();
-                    return;
-                }
+        // simulate next turn
+        if(Time.ticks() % 90 == 0) {
+            if(!turnInProgress && !roundFinished) {
+                simulateTurn();
             }
         }
     }
@@ -246,6 +255,7 @@ public class Blackjack extends Banking implements Game {
         graphics.setFont(Fonts.default20);
         graphics.setColor(Colours.WHITE);
         graphics.drawString("Blackjack", 50, 50);
+        graphics.drawString("fps: " + Engine.framerate(), 50, 80);
 
         for(Player player: players) {
             int index = players.indexOf(player);
@@ -288,6 +298,10 @@ public class Blackjack extends Banking implements Game {
                     }
                 });
             }
+        }
+
+        if(players.stream().allMatch(Player::isOut)) {
+            graphics.drawString("Press 'E' to start the next hand!", 20, Renderer.height() - 20 - ((int) (Math.sin(Time.slowTicks()) * 2)));
         }
     }
 }

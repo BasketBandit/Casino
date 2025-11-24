@@ -1,10 +1,12 @@
 package com.basketbandit.component;
 
 public enum Action {
-    DEAL(0),
-    HIT(1),
-    STAND(2),
-    SPLIT(3);
+    WAITING(0),
+    DEAL(1),
+    HIT(2),
+    STAND(3),
+    SPLIT(4),
+    DOUBLE(5);
 
     private final int value;
 
