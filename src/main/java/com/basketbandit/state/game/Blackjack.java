@@ -30,9 +30,9 @@ public class Blackjack extends Banking implements Game {
     private final HashMap<String, Rectangle> pointers = new HashMap<>();
     private final LinkedList<Player> players = new LinkedList<>();
     private final Dealer dealer;
+    private Player playersTurn = new Player("placeholder");
     private boolean roundFinished;
     private boolean turnInProgress;
-
     private int cardDrawDelayMs = 500;
 
     public Blackjack() {
@@ -45,22 +45,24 @@ public class Blackjack extends Banking implements Game {
         addPlayer(new Player("Ant"));
         addPlayer(new Player("Mark"));
 
-        int dealer = (Renderer.width() - 175) / 2; // calculates spacing between objects
-        int space = (Renderer.width() - ((players.size()-1)*175)) / ((players.size()-1)+1); // calculates spacing between objects
-        positions.add(new Rectangle(dealer, 150, 175, 100)); // dealers position
+        int space = (Renderer.width() - ((players.size()-1)*175)) / ((players.size()-1)+1); // calculates spacing between objects (width - (occurrences - 1) / occurrences)
+        int middle = (players.size()-1)/2;
+        positions.add(new Rectangle((Renderer.width() - 175) / 2, 150, 175, 100)); // dealers position
         for(int i = 0; i < (players.size()-1); i++) {
-            positions.add(new Rectangle(space+(i*175)+(i*space), (Renderer.height() - 250), 175, 100));
+            positions.add(new Rectangle(space+(i*175)+(i*space), (Renderer.height() - 250 - (players.size() % 2 == 0 ? (Math.abs(i - middle)*50) : 0)), 175, 100));
         }
         // subtract the total width of your objects from the total length available, and then divide that result by the number of spaces between the objects
 
         for(Player player: players) {
-            if(player.isPlaying()) {
-                int index = players.indexOf(player)-1;
-                buttons.put("hit", new Rectangle( space+(index*175)+(index*space), (Renderer.height() - 145), 85, 40));
-                buttons.put("stand", new Rectangle(space+(index*175)+(index*space) + (175/2)+3, (Renderer.height() - 145), 85, 40));
+            if(player.isHuman()) {
+                Rectangle position = positions.get(players.indexOf(player));
+                buttons.put("hit", new Rectangle(position.x, position.y + position.height + 10, 85, 40));
+                buttons.put("stand", new Rectangle(position.x + (position.width/2)+3, position.y + position.height + 10, 85, 40));
             }
         }
+
         pointers.put("pointer", new Rectangle(0, 0, 10, 10));
+        pointers.put("player-pointer", new Rectangle(0, 0, 10, 10));
     }
 
     public void addPlayers(ArrayList<Player> players) {
@@ -88,8 +90,34 @@ public class Blackjack extends Banking implements Game {
                     continue;
                 }
 
-                while(player.isPlaying() && player.action() == Action.WAITING) {
+                playersTurn = player;
+
+                // figure out if players are out
+                if(!player.isOut() && (player.hand().isBlackjack() || player.hand().isBust())) {
+                    player.setOut(true);
+                    player.setAction(Action.STAND);
+                    continue;
+                }
+
+                // set playing players actions from deal to hit
+                if(player.isHuman() && player.action() == Action.DEAL && !player.hand().isEmpty()) {
+                    player.setAction(Action.WAITING);
+                }
+
+                while(player.isHuman() && player.action() == Action.WAITING) {
                     Thread.onSpinWait();
+                }
+
+                if(!player.isHuman()) { // dealer and npcs
+                    if(player.hand().cards().isEmpty()) {
+                        player.setAction(Action.DEAL);
+                    } else {
+                        if(player.hand().value() < 17) {
+                            player.setAction(Action.HIT);
+                        } else {
+                            player.setAction(Action.STAND);
+                        }
+                    }
                 }
 
                 switch(player.action()) {
@@ -119,6 +147,7 @@ public class Blackjack extends Banking implements Game {
         } catch(InterruptedException e) {
             throw new RuntimeException(e);
         }
+        playersTurn = new Player("placeholder");
         turnInProgress = false;
     }
 
@@ -131,6 +160,7 @@ public class Blackjack extends Banking implements Game {
         });
         roundFinished = false;
         turnInProgress = false;
+        playersTurn = new Player("placeholder");
         simulateTurn();
     }
 
@@ -152,7 +182,7 @@ public class Blackjack extends Banking implements Game {
                 buttons.keySet().forEach(button -> {
                     if(buttons.get(button).intersects(point)) {
                         for(Player player : players) {
-                            if(player.isPlaying() && player.hand().cards().size() > 1 && !player.isOut()) {
+                            if(player.isHuman() && player.hand().cards().size() > 1 && !player.isOut()) {
                                 player.setAction(button.equals("stand") ? Action.STAND : Action.HIT);
                                 if(!turnInProgress && !roundFinished && !dealer.hand().isBust() && !players.stream().allMatch(Player::isOut)) {
                                     simulateTurn();
@@ -176,7 +206,7 @@ public class Blackjack extends Banking implements Game {
                 //     simulateTurn();
                 // }
                 for(Player player : players) {
-                    if(player.isPlaying()) {
+                    if(player.isHuman()) {
                         if(selectedButton.equals(buttons.get("hit"))) {
                             player.setAction(Action.HIT);
                         }
@@ -189,7 +219,7 @@ public class Blackjack extends Banking implements Game {
             }
             if(dealer.hand().cards().size() > 1 && (id[0] == Keyboard.LEFT_ARROW || id[0] == Keyboard.RIGHT_ARROW)) {
                 for(Player player : players) {
-                    if(player.isPlaying() && player.hand().cards().size() > 1 && !player.isOut()) {
+                    if(player.isHuman() && player.hand().cards().size() > 1 && !player.isOut()) {
                         selectedButton = (selectedButton == buttons.get("hit")) ? buttons.get("stand") : buttons.get("hit");
                         return;
                     }
@@ -206,35 +236,6 @@ public class Blackjack extends Banking implements Game {
         if(dealer.hand().isBust() || players.stream().allMatch(Player::isOut)) {
             roundFinished = true;
             return;
-        }
-
-        for(Player player: players) {
-            if(player.isOut()) {
-                continue;
-            }
-
-            // set playing players actions from deal to hit
-            if(player.isPlaying() && player.action() == Action.DEAL && !player.hand().isEmpty()) {
-                player.setAction(Action.WAITING);
-                continue;
-            }
-
-            // figure out if players are out
-            if(!player.isOut() && (player.hand().isBlackjack() || player.hand().isBust())) {
-                player.setOut(true);
-            }
-
-            if(!player.isPlaying()) { // dealer and npcs
-                if(player.hand().cards().isEmpty()) {
-                    player.setAction(Action.DEAL);
-                    continue;
-                }
-                if(player.hand().value() < 17) {
-                    player.setAction(Action.HIT);
-                    continue;
-                }
-                player.setAction(Action.STAND);
-            }
         }
 
         // simulate next turn
@@ -276,8 +277,14 @@ public class Blackjack extends Banking implements Game {
                 graphics.drawString("Blackjack", c[0], r.y + 125 + (int) (Math.sin(Time.slowTicks()) * 2));
             }
 
+            if(!player.equals(dealer) && !player.hand().isBlackjack() && player.action() == Action.STAND) {
+                graphics.setColor(Colours.WHITE);
+                int[] c = Fonts.centered(graphics, "Stand", r, Fonts.default20);
+                graphics.drawString("Stand", c[0], r.y + 125 + (int) (Math.sin(Time.slowTicks()) * 2));
+            }
+
             // players action buttons
-            if(!roundFinished && player.isPlaying() && player.action() != Action.DEAL && !player.isOut() && !dealer.hand().isBust() && dealer.hand().cards().size() > 1) {
+            if(!roundFinished && playersTurn.equals(player) && player.isHuman() && player.action() != Action.DEAL && !player.isOut() && !dealer.hand().isBust() && dealer.hand().cards().size() > 1) {
                 buttons.forEach((name, button) ->  {
                     graphics.setColor(name.equals("hit") ? Colours.BLUE : Colours.CRIMSON_75);
                     graphics.fill(button);
@@ -295,6 +302,11 @@ public class Blackjack extends Banking implements Game {
                         graphics.fill(pointers.get("pointer"));
                     }
                 });
+            }
+
+            if(playersTurn != null && playersTurn.equals(player)) {
+                pointers.get("player-pointer").setLocation(r.x + r.width-10, r.y - 20);
+                graphics.fill(pointers.get("player-pointer"));
             }
         }
 
