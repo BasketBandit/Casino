@@ -7,6 +7,7 @@ import java.util.Random;
 
 public class Deck {
     private final ArrayList<Card> cards = new ArrayList<>();
+    private final int initialSize;
 
     public Deck() {
         for(Suit suit : Suit.values()) {
@@ -15,6 +16,7 @@ public class Deck {
                 cards.add(new Card(i, value, suit));
             }
         }
+        initialSize = cards.size();
     }
 
     /**
@@ -33,11 +35,13 @@ public class Deck {
         Random random = new Random();
         Card[] draw = new Card[count];
         for(int i = 0; i < count; i++) {
-            int index = random.nextInt(cards.size());
-            draw[i] = cards.get(index);
-            cards.remove(index);
+            draw[i] = cards.removeFirst();
         }
         return draw;
+    }
+
+    public int initialSize() {
+        return initialSize;
     }
 
     /**

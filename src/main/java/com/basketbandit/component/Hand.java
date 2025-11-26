@@ -7,9 +7,11 @@ import java.util.ArrayList;
 public class Hand {
     protected static final org.slf4j.Logger log = LoggerFactory.getLogger(Hand.class);
     private ArrayList<Card> cards;
+    private int bet = 0;
 
-    public Hand() {
+    public Hand(int bet) {
         this.cards = new ArrayList<>();
+        this.bet = bet;
     }
 
     public ArrayList<Card> cards() {
@@ -53,5 +55,13 @@ public class Hand {
             total += card.value();
         }
         return total;
+    }
+
+    public void doubleBet() {
+        this.bet *= 2;
+    }
+
+    public int bet() {
+        return this.bet;
     }
 }
