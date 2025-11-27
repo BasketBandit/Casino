@@ -8,6 +8,7 @@ import java.util.Random;
 public class Deck {
     private final ArrayList<Card> cards = new ArrayList<>();
     private final int initialSize;
+    private int runningCount;
 
     public Deck() {
         for(Suit suit : Suit.values()) {
@@ -17,6 +18,7 @@ public class Deck {
             }
         }
         initialSize = cards.size();
+        runningCount = 0;
     }
 
     /**
@@ -36,6 +38,7 @@ public class Deck {
         Card[] draw = new Card[count];
         for(int i = 0; i < count; i++) {
             draw[i] = cards.removeFirst();
+            updateRunningCount(draw[i]);
         }
         return draw;
     }
@@ -49,5 +52,20 @@ public class Deck {
      */
     public void shuffle() {
         Collections.shuffle(cards);
+    }
+
+    private void updateRunningCount(Card card) {
+        switch(card.id()) {
+            case 2, 3, 4, 5, 6 -> runningCount++;
+            case 1, 10, 11, 12, 13 -> runningCount--;
+        }
+    }
+
+    public int runningCount() {
+        return runningCount;
+    }
+
+    public int trueCount() {
+        return runningCount / (cards().size() / 52);
     }
 }

@@ -8,6 +8,7 @@ public class Hand {
     protected static final org.slf4j.Logger log = LoggerFactory.getLogger(Hand.class);
     private ArrayList<Card> cards;
     private int bet = 0;
+    private boolean doubled = false;
 
     public Hand(int bet) {
         this.cards = new ArrayList<>();
@@ -57,8 +58,12 @@ public class Hand {
         return total;
     }
 
-    public void doubleBet() {
-        this.bet *= 2;
+    public boolean doubled() {
+        return this.doubled;
+    }
+
+    public void setDoubled() {
+        this.doubled = true;
     }
 
     public int bet() {

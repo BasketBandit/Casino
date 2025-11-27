@@ -11,6 +11,7 @@ public class Card extends Rectangle implements Renderable {
     private final String name;
     private final int value;
     private final Suit suit;
+    private boolean flipped;
 
     public Card(int id, int value, Suit suit) {
         super(71, 95);
@@ -25,6 +26,7 @@ public class Card extends Rectangle implements Renderable {
             default -> name = id + "";
         }
         this.spriteManager = new SpriteManager<>(this);
+        this.flipped = false;
     }
 
     public int id() {
@@ -41,6 +43,14 @@ public class Card extends Rectangle implements Renderable {
 
     public Suit suit() {
         return suit;
+    }
+
+    public boolean flipped() {
+        return flipped;
+    }
+
+    public void flip() {
+        this.flipped = !this.flipped;
     }
 
     @Override
