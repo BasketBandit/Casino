@@ -53,9 +53,10 @@ public class Player {
         return currency;
     }
 
-    public boolean placeBet(int currency) {
-        if(this.currency >= currency) {
-            this.currency -= currency;
+    public boolean placeBet(int value) {
+        if(this.currency >= value) {
+            this.currency -= value;
+            addHand(new Hand(value));
             return true;
         }
         return false;

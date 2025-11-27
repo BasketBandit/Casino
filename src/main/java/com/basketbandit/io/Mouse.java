@@ -15,17 +15,10 @@ public class Mouse implements MouseListener, MouseMotionListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        if(buttons[e.getButton()]) {
-            return;
-        }
-
-        buttons[e.getButton()] = true;
-        Engine.input(Input.MOUSE, new int[]{e.getButton(), e.getX(), e.getY()});
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        buttons[e.getButton()] = false;
     }
 
     @Override
@@ -40,7 +33,7 @@ public class Mouse implements MouseListener, MouseMotionListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-
+        Engine.input(Input.MOUSE, new int[]{e.getButton(), e.getX(), e.getY()});
     }
 
     @Override

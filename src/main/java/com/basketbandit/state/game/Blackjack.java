@@ -34,8 +34,8 @@ public class Blackjack extends Banking implements Game {
     private boolean handFinished = false;
     private boolean turnInProgress = false;
     private boolean betsSettled = false;
-    private int minimumBet = 5;
-    private int cardDrawDelayMs = 1; // 500
+    private int minimumBet = 10;
+    private int cardDrawDelayMs = 500; // 500
 
     private final LinkedList<Player> players = new LinkedList<>();
     private final Dealer dealer;
@@ -60,17 +60,15 @@ public class Blackjack extends Banking implements Game {
         }
         // subtract the total width of your objects from the total length available, and then divide that result by the number of spaces between the objects
 
-        for(Player player: players) {
-            if(player.isHuman()) {
-                Rectangle position = positions.get(players.indexOf(player));
-                buttons.put("hit", new Rectangle(position.x, position.y + position.height + 10, 85, 40));
-                buttons.put("stand", new Rectangle(position.x + (position.width/2)+3, position.y + position.height + 10, 85, 40));
-                buttons.put("10", new Rectangle(position.x, position.y + position.height + 10, 40, 40));
-                buttons.put("25", new Rectangle(position.x + 45, position.y + position.height + 10, 40, 40));
-                buttons.put("50", new Rectangle(position.x + 90, position.y + position.height + 10, 40, 40));
-                buttons.put("100", new Rectangle(position.x + 135, position.y + position.height + 10, 40, 40));
-                buttons.put("sans", new Rectangle(position.x, position.y + position.height + 55, 175, 40));
-            }
+        if(human != null) {
+            Rectangle position = positions.get(players.indexOf(human));
+            buttons.put("hit", new Rectangle(position.x, position.y + position.height + 10, 85, 40));
+            buttons.put("stand", new Rectangle(position.x + (position.width / 2) + 3, position.y + position.height + 10, 85, 40));
+            buttons.put("10", new Rectangle(position.x, position.y + position.height + 10, 40, 40));
+            buttons.put("25", new Rectangle(position.x + 45, position.y + position.height + 10, 40, 40));
+            buttons.put("50", new Rectangle(position.x + 90, position.y + position.height + 10, 40, 40));
+            buttons.put("100", new Rectangle(position.x + 135, position.y + position.height + 10, 40, 40));
+            buttons.put("sans", new Rectangle(position.x, position.y + position.height + 55, 175, 40));
         }
 
         pointers.put("mouse", new Rectangle(0, 0, 1, 1));
@@ -108,18 +106,21 @@ public class Blackjack extends Banking implements Game {
                     }
                 }
 
+                // don't wait for bet if player can't
+                if(player.currency() < minimumBet && player.hands().isEmpty()) {
+                    player.setOut(true);
+                    player.setAction(Action.STAND);
+                }
+
                 // wait for player input
-                while(player.isHuman() && player.action() == Action.WAITING) {
+                while(!player.isOut() && player.isHuman() && player.action() == Action.WAITING) {
                     Thread.onSpinWait();
                 }
 
                 // resolve actions for all players
                 if(player.action() == Action.BET) {
                     if(player.placeBet(minimumBet)) {
-                        player.addHand(new Hand(minimumBet));
                         player.setAction(Action.DEAL);
-                    } else {
-                        player.setOut(true);
                     }
                     continue;
                 }
@@ -265,6 +266,16 @@ public class Blackjack extends Banking implements Game {
 
     @Override
     public void input(Input type, int[] id) {
+        if(type == Input.MOUSE && id[0] == Mouse.MOUSE_MOVED) {
+            pointers.get("mouse").setLocation(id[1], id[2]);
+        }
+
+        // allow next hand even if not players turn
+        if(handFinished && type == Input.KEYBOARD && id[0] == Keyboard.E) {
+            nextHand();
+            return;
+        }
+
         if(!playersTurn.equals(human) || human.isOut()) {
             return;
         }
@@ -274,13 +285,12 @@ public class Blackjack extends Banking implements Game {
                 pointers.get("mouse").setLocation(id[1], id[2]);
                 Rectangle point = pointers.get("mouse");
 
-                buttons.keySet().forEach(button -> {
-                    if(placingBets && buttons.get(button).intersects(point) && (!button.equals("hit") && !button.equals("stand"))) {
-                        selectedButton = buttons.get(button);
-                    } else if(buttons.get(button).intersects(point) && (button.equals("hit") || button.equals("stand"))) {
-                        selectedButton = buttons.get(button);
-                    } else {
-                        selectedButton = null;
+                buttons.forEach((name, button) -> {
+                    if(placingBets && button.intersects(point) && (!name.equals("hit") && !name.equals("stand"))) {
+                        selectedButton = button;
+                    }
+                    if(!placingBets && button.intersects(point) && (name.equals("hit") || name.equals("stand"))) {
+                        selectedButton = button;
                     }
                 });
                 return;
@@ -290,10 +300,24 @@ public class Blackjack extends Banking implements Game {
                 pointers.get("mouse").setLocation(id[1], id[2]);
                 Rectangle point = pointers.get("mouse");
 
-                buttons.keySet().forEach(button -> {
-                    if(buttons.get(button).intersects(point)) {
+                buttons.forEach((name, button) -> {
+                    if(placingBets && button.intersects(point) && (!name.equals("hit") && !name.equals("stand"))) {
+                        switch(name) {
+                            case "10", "25", "50", "100" -> {
+                                if(human.placeBet(Integer.parseInt(name))) {
+                                    human.setAction(Action.DEAL);
+                                }
+                            }
+                            case "sans" -> {
+                                human.setOut(true);
+                                human.setAction(Action.STAND);
+                            }
+                        }
+                        return;
+                    }
+                    if(!placingBets && button.intersects(point) && (name.equals("hit") || name.equals("stand"))) {
                         if(human.hand().cards().size() > 1 && !human.isOut()) {
-                            human.setAction(button.equals("stand") ? Action.STAND : Action.HIT);
+                            human.setAction(name.equals("stand") ? Action.STAND : Action.HIT);
                             if(human.action() == Action.STAND) {
                                 human.setOut(true);
                             }
@@ -320,9 +344,6 @@ public class Blackjack extends Banking implements Game {
             if(id[0] == Keyboard.LEFT_ARROW || id[0] == Keyboard.RIGHT_ARROW) {
                 selectedButton = (selectedButton == buttons.get("hit")) ? buttons.get("stand") : buttons.get("hit");
             }
-            if(id[0] == Keyboard.E) {
-                nextHand();
-            }
         }
     }
 
@@ -343,9 +364,6 @@ public class Blackjack extends Banking implements Game {
         if(Time.ticks() % 10 == 0 && !turnInProgress && !handFinished && !placingBets) {
             simulateTurn();
         }
-        if(handFinished) {
-            nextHand();
-        }
     }
 
     @Override
@@ -362,11 +380,14 @@ public class Blackjack extends Banking implements Game {
             int index = players.indexOf(player);
             Rectangle r = positions.get(index);
 
+            // player card box
             graphics.setColor(Colours.WHITE);
             graphics.draw(r);
 
+            // player names and funds
             if(!player.equals(dealer)) {
-                graphics.drawRect(r.x, r.y - 50, 25, 25);
+                graphics.drawRect(r.x, r.y - 60, 25, 25);
+                graphics.drawString(player.hands().isEmpty() ? "" : player.hand().bet() + "", r.x + 1, r.y - 38);
                 graphics.drawString(player.name() + " - $" + player.currency(), r.x, r.y - 10);
             }
 
@@ -374,6 +395,7 @@ public class Blackjack extends Banking implements Game {
                 continue;
             }
 
+            // player cards
             for(int i = 0; i < player.hand().cards().size(); i++) {
                 if(player instanceof Dealer && i == 0 && player.hand().cards().size() < 3 && !player.isOut()) {
                     graphics.drawImage(SpriteLibrary.instance("reverse"), r.x + 2, r.y + 2 + (int) (Math.sin(Time.slowTicks() + i) * 2), null);
@@ -382,16 +404,19 @@ public class Blackjack extends Banking implements Game {
                 }
             }
 
+            // bet value
             if(!player.equals(dealer)) {
-                graphics.drawString(player.hand().bet() + "", r.x + 4, r.y - 28);
+
             }
 
+            // if blackjack
             if(player.hand().isBlackjack()) {
                 graphics.setColor(Colours.WHITE);
                 int[] c = Fonts.centered(graphics, "Blackjack", r, Fonts.default20);
                 graphics.drawString("Blackjack", c[0], r.y + 125 + (int) (Math.sin(Time.slowTicks()) * 2));
             }
 
+            // if bust or stand
             graphics.setColor(Colours.WHITE);
             if(player.hand().isBust()) {
                 int[] c = Fonts.centered(graphics, "Bust", r, Fonts.default20);
@@ -401,6 +426,7 @@ public class Blackjack extends Banking implements Game {
                 graphics.drawString("Stand", c[0], r.y + 125 + (int) (Math.sin(Time.slowTicks()) * 2));
             }
 
+            // player turn pointer
             if(playersTurn != null && playersTurn.equals(player)) {
                 pointers.get("player-pointer").setLocation(r.x + r.width-10, r.y - 20);
                 graphics.fill(pointers.get("player-pointer"));
@@ -426,7 +452,11 @@ public class Blackjack extends Banking implements Game {
                 }
                 // bet buttons
                 if(placingBets && human.action() == Action.WAITING && (!name.equals("hit") && !name.equals("stand"))) {
-                    graphics.setColor(button.equals(selectedButton) ? Colours.BLUE : Colours.CRIMSON_75);
+                    if(name.equals("sans")) {
+                        graphics.setColor(button.equals(selectedButton) ? Colours.BLUE : Colours.CRIMSON_75);
+                    } else {
+                        graphics.setColor(human.currency() < Integer.parseInt(name) ? Colours.DARK_GREY_75 : button.equals(selectedButton) ? Colours.BLUE : Colours.CRIMSON_75);
+                    }
                     graphics.fill(button);
                     int[] c = Fonts.centered(graphics, name, button, Fonts.default20);
                     graphics.setColor(Colours.WHITE);
@@ -438,9 +468,5 @@ public class Blackjack extends Banking implements Game {
         if(players.stream().allMatch(Player::isOut)) {
             graphics.drawString("Press 'E' to start the next hand!", 20, Renderer.height() - 20 - ((int) (Math.sin(Time.slowTicks()) * 2)));
         }
-
-        // debug draw mouse
-        graphics.setColor(Color.WHITE);
-        graphics.fill(pointers.get("mouse"));
     }
 }
