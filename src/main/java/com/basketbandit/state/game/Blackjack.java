@@ -3,13 +3,13 @@ package com.basketbandit.state.game;
 import com.basketbandit.Engine;
 import com.basketbandit.Renderer;
 import com.basketbandit.component.Action;
+import com.basketbandit.component.Card;
 import com.basketbandit.component.Hand;
 import com.basketbandit.component.Shoe;
 import com.basketbandit.io.Input;
 import com.basketbandit.io.Keyboard;
 import com.basketbandit.io.Mouse;
 import com.basketbandit.io.audio.AudioLibrary;
-import com.basketbandit.io.image.SpriteLibrary;
 import com.basketbandit.player.AdvantagePlayer;
 import com.basketbandit.player.Dealer;
 import com.basketbandit.player.Player;
@@ -33,14 +33,14 @@ public class Blackjack extends Banking implements Game {
     private final HashMap<String, Button> betButtons = new HashMap<>();
     private Rectangle selectedButton;
 
-    private boolean autoplay = true;
+    private boolean autoplay = false;
 
     private boolean placingBets = true;
     private boolean handFinished = false;
     private boolean turnInProgress = false;
     private boolean betsSettled = false;
     private int minimumBet = 10;
-    private int cardDrawDelayMs = 100; // 500
+    private int cardDrawDelayMs = 500; // 500
 
     private final LinkedList<Player> players = new LinkedList<>();
     private final Dealer dealer;
@@ -205,17 +205,30 @@ public class Blackjack extends Banking implements Game {
 
                 // resolve actions for all players
                 switch(player.action()) {
-                    case Action.STAND -> player.setOut(true);
+                    case Action.STAND -> {
+                        if(player.equals(dealer)) {
+                            dealer.revealCard();
+                            Thread.sleep(cardDrawDelayMs);
+                        }
+                        player.setOut(true);
+                    }
                     case Action.DEAL -> {
-                        player.hand().addCard(deck.draw(1));
-                        AudioLibrary.effect("deal1").play(-15);
-                        Thread.sleep(cardDrawDelayMs);
-                        player.hand().addCard(deck.draw(1));
-                        AudioLibrary.effect("deal1").play(-15);
-                        Thread.sleep(cardDrawDelayMs);
+                        Card[] card = deck.draw(2);
+                        if(player.equals(dealer)) {
+                            card[0].flip(); // dealers first card is always flipped
+                        }
+                        for(int i = 0; i < 2; i++) {
+                            player.hand().addCard(card[i]);
+                            AudioLibrary.effect("deal1").play(-15);
+                            Thread.sleep(cardDrawDelayMs);
+                        }
                         player.setAction(Action.WAITING);
                     }
                     case Action.HIT -> {
+                        if(player.equals(dealer)) {
+                            dealer.revealCard();
+                            Thread.sleep(cardDrawDelayMs);
+                        }
                         player.hand().addCard(deck.draw(1));
                         AudioLibrary.effect("deal1").play(-15);
                         Thread.sleep(cardDrawDelayMs);
@@ -442,16 +455,7 @@ public class Blackjack extends Banking implements Game {
 
             // player cards
             for(int i = 0; i < player.hand().cards().size(); i++) {
-                if(player instanceof Dealer && i == 0 && player.hand().cards().size() < 3 && !player.isOut()) {
-                    graphics.drawImage(SpriteLibrary.instance("reverse"), r.x + 2, r.y + 2 + (int) (Math.sin(Time.slowTicks() + i) * 2), null);
-                } else {
-                    player.hand().cards().get(i).render(r.x + 2 + (25 * i), r.y + 2 + (int) (Math.sin(Time.slowTicks() + i) * 2));
-                }
-            }
-
-            // bet value
-            if(!player.equals(dealer)) {
-
+                player.hand().cards().get(i).render(r.x + 2 + (25 * i), r.y + 2 + (int) (Math.sin(Time.slowTicks() + i) * 2));
             }
 
             // if blackjack

@@ -12,4 +12,10 @@ public class Dealer extends Player {
         log.info("{}'s total card value is: {}, will {} hit.", this.name(), value, (value < 17) ? "" : "not");
         return value < 17;
     }
+
+    public void revealCard() {
+        if(this.hand().cards().getFirst().flipped()) {
+            this.hand().cards().getFirst().flip();
+        }
+    }
 }

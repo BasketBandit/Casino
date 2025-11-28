@@ -62,11 +62,11 @@ public class Hand {
         return this.doubled;
     }
 
-    public void setDoubled() {
-        this.doubled = true;
-    }
-
     public int bet() {
         return this.bet;
+    }
+
+    public void setDoubled() {
+        this.doubled = true;
     }
 }

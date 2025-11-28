@@ -1,6 +1,7 @@
 package com.basketbandit.component;
 
 import com.basketbandit.Renderable;
+import com.basketbandit.io.image.SpriteLibrary;
 import com.basketbandit.io.image.SpriteManager;
 
 import java.awt.*;
@@ -59,7 +60,11 @@ public class Card extends Rectangle implements Renderable {
     }
 
     public void render(int x, int y) {
-        graphics.drawImage(this.spriteManager.override("missing"), x, y, null);
-        graphics.drawImage(this.spriteManager.sprite(), x, y, null);
+        if(!flipped) {
+            graphics.drawImage(this.spriteManager.override("missing"), x, y, null);
+            graphics.drawImage(this.spriteManager.sprite(), x, y, null);
+        } else {
+            graphics.drawImage(SpriteLibrary.instance("reverse"), x, y, null);
+        }
     }
 }
