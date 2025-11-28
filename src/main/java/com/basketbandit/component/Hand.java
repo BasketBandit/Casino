@@ -46,16 +46,60 @@ public class Hand {
     }
 
     public int value() {
+        int aces = 0;
         int total = 0;
+
         for(Card card: cards) {
-            // special case for aces
-            if(total < 11 && card.id() == 1) {
-                total += 11;
-                continue;
+            if(card.id() != 1) {
+                total += card.value();
+            } else {
+                aces++;
             }
-            total += card.value();
         }
+
+        // need to check if more than 0 aces else hard 11 becomes blackjack
+        if(aces > 0 && (total + (11 + (aces-1)) < 22)) {
+            total += (11 + (aces-1));
+        } else {
+            total += aces;
+        }
+
         return total;
+    }
+
+    public boolean isSoft() {
+        int aces = 0;
+        int total = 0;
+
+        for(Card card: cards) {
+            if(card.id() != 1) {
+                total += card.value();
+            } else {
+                aces++;
+            }
+        }
+
+        if(aces == 0) {
+            return false;
+        }
+
+        return (total + (11 + (aces-1)) < 22);
+    }
+
+    public boolean isPair() {
+        if(cards.size() != 2) {
+            return false;
+        }
+
+        int id = 0;
+        for(Card card: cards) {
+            if(card.id() == id) {
+                return true;
+            }
+            id = card.id();
+        }
+
+        return false;
     }
 
     public boolean doubled() {
