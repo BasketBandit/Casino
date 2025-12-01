@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 public class Hand {
     protected static final org.slf4j.Logger log = LoggerFactory.getLogger(Hand.class);
+    private Action action = Action.WAITING;
     private ArrayList<Card> cards;
     private int bet = 0;
     private boolean doubled = false;
@@ -102,6 +103,10 @@ public class Hand {
         return false;
     }
 
+    public Action action() {
+        return action;
+    }
+
     public boolean doubled() {
         return this.doubled;
     }
@@ -110,7 +115,12 @@ public class Hand {
         return this.bet;
     }
 
+    public void setAction(Action action) {
+        this.action = action;
+    }
+
     public void setDoubled() {
+        this.bet *= 2;
         this.doubled = true;
     }
 }

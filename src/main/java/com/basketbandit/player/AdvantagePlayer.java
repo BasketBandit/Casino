@@ -2,6 +2,7 @@ package com.basketbandit.player;
 
 import com.basketbandit.component.Action;
 import com.basketbandit.component.Card;
+import com.basketbandit.component.Hand;
 
 public class AdvantagePlayer extends Player {
     public AdvantagePlayer(String name) {
@@ -10,13 +11,13 @@ public class AdvantagePlayer extends Player {
     }
 
     // basic strategy
-    public Action decideAction(Card dealerCard) {
-        int playerHandValue = hand().value();
-        int playerFirstCardValue = hand().cards().getFirst().value();
+    public Action decideAction(Hand hand, Card dealerCard) {
+        int playerHandValue = hand.value();
+        int playerFirstCardValue = hand.cards().getFirst().value(); // for splits
         int dealerHandValue = dealerCard.value() == 1 ? 11 : dealerCard.value(); // deal with ace
 
         // split
-        if(hand().cards().size() == 2 && hand().isPair()) {
+        if(hand.cards().size() == 2 && mainHand().isPair()) {
             switch(dealerHandValue) {
                 case 2, 3, 4 -> {
                     switch(playerFirstCardValue) {
@@ -75,7 +76,7 @@ public class AdvantagePlayer extends Player {
         }
 
         // soft, non-split
-        if(hand().isSoft()) {
+        if(hand.isSoft()) {
             switch(dealerHandValue) {
                 case 2, 7, 8 -> {
                     switch(playerHandValue) {
@@ -147,7 +148,7 @@ public class AdvantagePlayer extends Player {
                         return Action.HIT;
                     }
                     case 10, 11 -> {
-                        return !hand().doubled() ? Action.DOUBLE : Action.STAND;
+                        return !hand.doubled() ? Action.DOUBLE : Action.STAND;
                     }
                     default -> {
                         return Action.STAND;
@@ -160,7 +161,7 @@ public class AdvantagePlayer extends Player {
                         return Action.HIT;
                     }
                     case 9, 10, 11 -> {
-                        return !hand().doubled() ? Action.DOUBLE : Action.STAND;
+                        return !hand.doubled() ? Action.DOUBLE : Action.STAND;
                     }
                     default -> {
                         return Action.STAND;
@@ -173,7 +174,7 @@ public class AdvantagePlayer extends Player {
                         return Action.HIT;
                     }
                     case 9, 10, 11 -> {
-                        return !hand().doubled() ? Action.DOUBLE : Action.STAND;
+                        return !hand.doubled() ? Action.DOUBLE : Action.STAND;
                     }
                     default -> {
                         return Action.STAND;
@@ -186,7 +187,7 @@ public class AdvantagePlayer extends Player {
                         return Action.HIT;
                     }
                     case 10, 11 -> {
-                        return !hand().doubled() ? Action.DOUBLE : Action.STAND;
+                        return !hand.doubled() ? Action.DOUBLE : Action.STAND;
                     }
                     default -> {
                         return Action.STAND;
@@ -199,7 +200,7 @@ public class AdvantagePlayer extends Player {
                         return Action.HIT;
                     }
                     case 11 -> {
-                        return !hand().doubled() ? Action.DOUBLE : Action.STAND;
+                        return !hand.doubled() ? Action.DOUBLE : Action.STAND;
                     }
                     default -> {
                         return Action.STAND;

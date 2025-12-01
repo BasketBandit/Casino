@@ -1,5 +1,7 @@
 package com.basketbandit.player;
 
+import com.basketbandit.component.Card;
+
 public class Dealer extends Player {
 
     public Dealer() {
@@ -8,14 +10,18 @@ public class Dealer extends Player {
 
     /* Dealer will always hit if below 17 */
     public boolean willDraw() {
-        int value = hand().value();
+        int value = mainHand().value();
         log.info("{}'s total card value is: {}, will {} hit.", this.name(), value, (value < 17) ? "" : "not");
         return value < 17;
     }
 
     public void revealCard() {
-        if(this.hand().cards().getFirst().flipped()) {
-            this.hand().cards().getFirst().flip();
+        if(this.mainHand().cards().getFirst().flipped()) {
+            this.mainHand().cards().getFirst().flip();
         }
+    }
+
+    public Card visibleCard() {
+        return this.mainHand().cards().getLast();
     }
 }

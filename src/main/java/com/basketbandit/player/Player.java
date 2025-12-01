@@ -41,7 +41,7 @@ public class Player {
         return hands;
     }
 
-    public Hand hand() {
+    public Hand mainHand() {
         return hands.getFirst();
     }
 
@@ -60,6 +60,17 @@ public class Player {
             return true;
         }
         return false;
+    }
+
+    public void doubleBet(Hand hand) {
+        hands.forEach(h -> {
+            if(h.equals(hand)) {
+                if(this.currency >= this.mainHand().bet()) {
+                    this.currency -= this.mainHand().bet();
+                    this.mainHand().setDoubled();
+                }
+            }
+        });
     }
 
     public void addCurrency(int currency) {
