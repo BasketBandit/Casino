@@ -1,6 +1,7 @@
 package com.basketbandit.io;
 
 import com.basketbandit.Engine;
+import com.basketbandit.Renderer;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -33,7 +34,8 @@ public class Mouse implements MouseListener, MouseMotionListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        Engine.input(Input.MOUSE, new int[]{e.getButton(), e.getX(), e.getY()});
+        int[] mouse = translate(e.getX(), e.getY());
+        Engine.input(Input.MOUSE, new int[]{e.getButton(), mouse[0], mouse[1]});
     }
 
     @Override
@@ -43,6 +45,13 @@ public class Mouse implements MouseListener, MouseMotionListener {
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        Engine.input(Input.MOUSE, new int[]{MOUSE_MOVED, e.getX(), e.getY()});
+        int[] mouse = translate(e.getX(), e.getY());
+        Engine.input(Input.MOUSE, new int[]{MOUSE_MOVED, mouse[0], mouse[1]});
+    }
+
+    private int[] translate(int x, int y) {
+        int a = Math.round((float) (x * Renderer.width()) / Renderer.windowWidth());
+        int b = Math.round((float) (y * Renderer.height()) / Renderer.windowHeight());
+        return new int[]{a, b};
     }
 }

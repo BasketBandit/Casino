@@ -67,7 +67,7 @@ public class Blackjack extends Banking implements Game {
         int middle = (players.size()-1)/2;
         positions.add(new Rectangle((Renderer.width() - 175) / 2, 100, 175, 100)); // dealers position
         for(int i = 0; i < (players.size()-1); i++) {
-            positions.add(new Rectangle(space+(i*175)+(i*space), (Renderer.height() - 300 - (players.size() % 2 == 0 ? (Math.abs(i - middle)*50) : 0)), 175, 100));
+            positions.add(new Rectangle(space+(i*175)+(i*space), (Renderer.height() - 450 - (players.size() % 2 == 0 ? (Math.abs(i - middle)*50) : 0)), 175, 100));
         }
         // subtract the total width of your objects from the total length available, and then divide that result by the number of spaces between the objects
 
@@ -164,8 +164,6 @@ public class Blackjack extends Banking implements Game {
         turnInProgress = true;
         try {
             for(Player player: players.reversed()) {
-                boolean split = false;
-                Hand splitHand = null;
                 playersTurn = player;
 
                 // if player is out, fail fast
@@ -253,24 +251,18 @@ public class Blackjack extends Banking implements Game {
                             hand.addCard(deck.draw(1));
                             player.setAction(Action.STAND);
                         }
-                        /// ////// WIP WIP WIP
+                        ///////// WIP WIP WIP
                         case Action.SPLIT ->  {
-                            split = true;
-                            splitHand = hand;
+                            player.placeBet(hand.bet());
+                            Card card = hand.cards().removeFirst();
+                            player.hands().getLast().addCard(card);
+                            AudioLibrary.effect("deal1").play(-15);
+                            Thread.sleep(cardDrawDelayMs);
+                            hand.addCard(deck.draw(1));
+                            AudioLibrary.effect("deal1").play(-15);
+                            Thread.sleep(cardDrawDelayMs);
                         }
                     }
-                }
-
-                // deal with splitting outside of loop (concurrent modification)
-                if(split && splitHand != null) {
-                    player.placeBet(splitHand.bet());
-                    Card card = splitHand.cards().removeFirst();
-                    player.hands().getLast().addCard(card);
-                    AudioLibrary.effect("deal1").play(-15);
-                    Thread.sleep(cardDrawDelayMs);
-                    splitHand.addCard(deck.draw(1));
-                    AudioLibrary.effect("deal1").play(-15);
-                    Thread.sleep(cardDrawDelayMs);
                 }
             }
 
@@ -553,5 +545,8 @@ public class Blackjack extends Banking implements Game {
         if(players.stream().allMatch(Player::isOut)) {
             graphics.drawString("Press 'E' to start the next hand!", 20, Renderer.height() - 20 - ((int) (Math.sin(Time.slowTicks()) * 2)));
         }
+
+        // debug draw mouse area
+        graphics.fill(pointers.get("mouse"));
     }
 }

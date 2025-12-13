@@ -39,8 +39,9 @@ public class Renderer {
     private static BufferStrategy bufferStrategy;
     private static final Canvas canvas = new Canvas(graphicsConfiguration);
     static {
-        canvas.setSize(new Dimension(1280, 720));
-        canvas.setBounds(0, 0,1280, 720);
+        Dimension d = new Dimension(Toolkit.getDefaultToolkit().getScreenSize());
+        canvas.setSize(d);
+        canvas.setBounds(0, 0, d.width, d.height);
         canvas.setBackground(Color.BLACK);
         canvas.setIgnoreRepaint(true);
         canvas.addKeyListener(new Keyboard());
@@ -56,21 +57,21 @@ public class Renderer {
     }
 
     public static int windowWidth() {
-        return width();
+        return Toolkit.getDefaultToolkit().getScreenSize().width;
     }
 
     public static int windowHeight() {
-        return height();
+        return Toolkit.getDefaultToolkit().getScreenSize().height;
     }
 
     // width of the unscaled base game (minus insets)
     public static int width() {
-        return 1280 - insets.left - insets.right;
+        return 1920 - insets.left - insets.right;
     }
 
     // height of the unscaled base game (minus insets)
     public static int height() {
-        return 720 - insets.top - insets.bottom;
+        return 1080 - insets.top - insets.bottom;
     }
 
     public static double widthRatio() {

@@ -4,12 +4,12 @@ import com.basketbandit.component.Action;
 import com.basketbandit.component.Hand;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Player {
     protected static final org.slf4j.Logger log = LoggerFactory.getLogger(Player.class);
     private final String name;
-    private ArrayList<Hand> hands = new ArrayList<>();
+    private CopyOnWriteArrayList<Hand> hands = new CopyOnWriteArrayList<>(); // semi-hacky way to allow concurrent modification of lists
     private Action action = Action.WAITING;
     private final boolean human;
     private boolean out;
@@ -37,7 +37,7 @@ public class Player {
         return out;
     }
 
-    public ArrayList<Hand> hands() {
+    public CopyOnWriteArrayList<Hand> hands() {
         return hands;
     }
 
@@ -90,6 +90,6 @@ public class Player {
     }
 
     public void clearHands() {
-        this.hands = new ArrayList<>();
+        this.hands = new CopyOnWriteArrayList<>();
     }
 }

@@ -12,12 +12,12 @@ public class Application extends JFrame {
 
     public Application() {
         this.setTitle("Casino");
-        this.setSize(new Dimension(1280, 720));
-        this.setPreferredSize(new Dimension(1280, 720));
+        this.setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize()));
+        this.setExtendedState(getExtendedState() | Frame.MAXIMIZED_BOTH);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setUndecorated(false);
         this.setIgnoreRepaint(true);
-        this.setResizable(false);
+        this.setResizable(true);
         this.setLayout(null);
         this.setLocationRelativeTo(null);
         this.add(Renderer.canvas());
